@@ -1,2 +1,2 @@
-# task-tracker-frontend
+# Task Tracker Frontend
 Frontend for Task Tracker
