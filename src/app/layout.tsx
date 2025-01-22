@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AppProvider from "@/components/AppProvider";
+import { Box, Button, Typography } from "@mui/material";
+import { JSX } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,9 +28,66 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable}`}>
-      <AppProvider>
-        {children}
-      </AppProvider>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            height: "100vh",
+            bgcolor: "#f9f9fc",
+          }}
+        >
+          {/* Верхний контент */}
+          <Box sx={{ display: "flex", flex: 1 }}>
+            {/* Левое меню */}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                width: 240,
+                bgcolor: "#ffffff",
+                boxShadow: 2,
+                p: 2,
+              }}
+            >
+              <Box sx={{ mb: 3 }}>
+                <Button variant="contained" color="primary" fullWidth>
+                  3:20:00
+                </Button>
+              </Box>
+              <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                {[
+                  "Time tracker",
+                  "Boards",
+                  "Projects",
+                  "Analytics",
+                  "Settings",
+                ].map((item, index) => (
+                  <Button
+                    key={index}
+                    variant="text"
+                    sx={{
+                      justifyContent: "flex-start",
+                      color: index === 1 ? "primary.main" : "text.secondary",
+                      fontWeight: index === 1 ? "bold" : "normal",
+                    }}
+                  >
+                    {item}
+                  </Button>
+                ))}
+              </Box>
+            </Box>
+
+            {/* Контент */}
+            <AppProvider>{children}</AppProvider>
+          </Box>
+
+          {/* Footer */}
+          <Box sx={{ bgcolor: "#ffffff", p: 2, boxShadow: 2 }}>
+            <Typography variant="body2" color="text.secondary" align="center">
+              © 2025 Your Company. All rights reserved.
+            </Typography>
+          </Box>
+        </Box>
       </body>
     </html>
   );
