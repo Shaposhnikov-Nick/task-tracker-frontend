@@ -2,6 +2,7 @@ import { Box, Button } from "@mui/material";
 import { JSX } from "react";
 
 const MainMenu = () => {
+  const menuItems = ["Tasks", "Boards", "Projects", "Analytics", "Settings"];
   return (
     <Box
       sx={{
@@ -19,21 +20,19 @@ const MainMenu = () => {
         </Button>
       </Box>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-        {["Time tracker", "Boards", "Projects", "Analytics", "Settings"].map(
-          (item, index) => (
-            <Button
-              key={index}
-              variant="text"
-              sx={{
-                justifyContent: "flex-start",
-                color: index === 1 ? "primary.main" : "text.secondary",
-                fontWeight: index === 1 ? "bold" : "normal",
-              }}
-            >
-              {item}
-            </Button>
-          ),
-        )}
+        {menuItems.map((item, index) => (
+          <Button
+            key={index}
+            variant="text"
+            sx={{
+              justifyContent: "flex-start",
+              color: index === 1 ? "primary.main" : "text.secondary",
+              fontWeight: index === 1 ? "bold" : "normal",
+            }}
+          >
+            {item}
+          </Button>
+        ))}
       </Box>
     </Box>
   );
