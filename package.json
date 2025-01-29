@@ -14,9 +14,11 @@
     "@mui/material": "^6.4.0",
     "@mui/x-date-pickers": "^7.24.0",
     "date-fns": "^4.1.0",
+    "formik": "^2.4.6",
     "next": "15.1.4",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "yup": "^1.6.1"
   },
   "devDependencies": {
     "@types/node": "^20",
