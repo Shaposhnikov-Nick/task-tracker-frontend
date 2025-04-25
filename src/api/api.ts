@@ -1,100 +1,104 @@
 export interface RequestConfig {
-  data?: any;
-  params?: any;
-  accessToken?: any;
-  method?: string;
+  data?: object | FormData;
+  params?: Record<string, string | number | boolean | undefined>;
+  accessToken?: string;
+  headers?: HeadersInit;
+  credentials?: RequestCredentials;
 }
 
-export const get = async (
+type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH";
+
+const request = async (
+  method: HttpMethod,
   url: string,
   config?: RequestConfig,
-): Promise<any> => {
+) => {
   try {
-    const response = await fetch(
-      buildUrl(url, config),
-      await adjustConfig(config),
-    );
-    return await handleResponse(response);
-  } catch (e: any) {
-    console.log("Error when GET api call");
+    const fullUrl = buildUrl(url, config);
+    const fetchConfig = adjustConfig(config, method);
+    const response = await fetch(fullUrl, fetchConfig);
+    return handleResponse(response);
+  } catch (e) {
+    console.error(`Error during ${method} request to ${url}:`, e);
+    throw e;
   }
 };
 
-export const post = async (
-  url: string,
-  config?: RequestConfig,
-): Promise<any> => {
-  try {
-    const response = await fetch(
-      buildUrl(url, config),
-      await adjustConfig({ ...config, method: "POST" }),
-    );
-    return await handleResponse(response);
-  } catch (e: any) {
-    console.log("Error when POST api call");
-  }
-};
+export const get = (url: string, config?: RequestConfig) =>
+  request("GET", url, config);
+
+export const post = (url: string, config?: RequestConfig) =>
+  request("POST", url, config);
+
+export const put = (url: string, config?: RequestConfig) =>
+  request("PUT", url, config);
+
+export const del = (url: string, config?: RequestConfig) =>
+  request("DELETE", url, config);
+
+export const patch = (url: string, config?: RequestConfig) =>
+  request("PATCH", url, config);
 
 function buildUrl(url: string, config?: RequestConfig): string {
-  let fullUrl = apiBaseUrl() + url;
+  const fullUrl = new URL(url, apiBaseUrl());
+  const params = { ...config?.params };
+
   if (config?.params) {
-    fullUrl += fullUrl.includes("?") ? "&" : "?";
-    Object.keys(config.params).forEach(
-      (key) => config.params[key] === undefined && delete config.params[key],
-    );
-    fullUrl += new URLSearchParams(config?.params).toString();
+    Object.entries(config.params).forEach(([key, value]) => {
+      if (value !== undefined) {
+        fullUrl.searchParams.append(key, String(value));
+      }
+    });
   }
-  return fullUrl;
+
+  return fullUrl.toString();
 }
 
-async function adjustConfig(config?: RequestConfig): Promise<RequestInit> {
-  let body: any;
-  const headers: HeadersInit = {};
+function adjustConfig(
+  config: RequestConfig = {},
+  method: HttpMethod = "GET",
+): RequestInit {
+  const headers = new Headers(config.headers);
+  let body: BodyInit | undefined;
 
-  if (config?.data instanceof FormData) {
-    body = config.data;
-  } else if (config?.data) {
-    body = JSON.stringify(config.data);
-    headers["Content-Type"] = "application/json";
-  }
+  const canHaveBody = method !== "GET" && method !== "HEAD";
 
-  if (config?.accessToken) {
-    headers["Cookie"] = `jwt.access=${config.accessToken}`;
+  if (canHaveBody && config.data) {
+    if (config.data instanceof FormData) {
+      body = config.data;
+    } else {
+      body = JSON.stringify(config.data);
+      headers.set("Content-Type", "application/json");
+    }
   }
 
   return {
-    credentials: "include",
+    method,
     headers,
     body,
-    ...config,
-  };
+    credentials: config.credentials ?? "include",
+  } as RequestInit;
 }
 
-const handleJSON = async (response: Response) => {
-  try {
-    return await response.json();
-  } catch (error) {
-    console.error("Error parsing JSON response: ", error);
-    return { status: response.status, message: response.statusText };
-  }
-};
+async function handleResponse(response: Response): Promise<any> {
+  const isJson = response.headers
+    .get("Content-Type")
+    ?.includes("application/json");
 
-const handleResponse = (response: Response): Promise<any> => {
-  const r =
-    typeof response.json === "function" &&
-    response.headers.get("Content-Type") != null
-      ? handleJSON(response)
-      : Promise.resolve({
-          status: response.status,
-          message: response.statusText,
-          headers: response.headers,
-        });
-  return r.then((r) => {
-    return r.status >= 400 || r.code >= 400
-      ? Promise.reject(r)
-      : Promise.resolve(r);
-  });
-};
+  const parsed = isJson
+    ? await response.json().catch(() => null)
+    : await response.text().catch(() => null);
+
+  if (!response.ok) {
+    return Promise.reject({
+      status: response.status,
+      statusText: response.statusText,
+      body: parsed,
+    });
+  }
+
+  return parsed;
+}
 
 export const apiBaseUrl = () => {
   return process.env.NEXT_PUBLIC_API_BASE_URL;
