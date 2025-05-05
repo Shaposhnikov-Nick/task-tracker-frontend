@@ -61,7 +61,7 @@ function adjustConfig(
   const headers = new Headers(config.headers);
   let body: BodyInit | undefined;
 
-  const canHaveBody = method !== "GET" && method !== "HEAD";
+  const canHaveBody = method !== "GET";
 
   if (canHaveBody && config.data) {
     if (config.data instanceof FormData) {
