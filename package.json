@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port 3001",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -13,8 +13,10 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^7.0.2",
-    "@mui/material": "^7.0.2",
+    "@mui/material": "^7.1.0",
     "@mui/material-nextjs": "^7.0.2",
+    "@mui/x-date-pickers": "^8.2.0",
+    "date-fns": "^4.1.0",
     "formik": "^2.4.6",
     "next": "15.3.1",
     "react": "^19.0.0",
